@@ -25,4 +25,4 @@ RUN npm i -g @nestjs/cli
 RUN npm link webpack
 RUN nest build
 
-CMD [ "node", "dist/main" ]
+CMD [ "node", "dist/src/main" ]
