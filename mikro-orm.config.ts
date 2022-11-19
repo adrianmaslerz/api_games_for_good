@@ -1,5 +1,6 @@
 import { Options } from '@mikro-orm/core';
 import { ConfigService } from '@nestjs/config';
+import { UploadedFileEntity } from './src/modules/upload/entity/uploaded-file.entity';
 import { IEnvironments } from './src/config/environments';
 import { PasswordTokenEntity } from './src/modules/auth/entity/password-token.entity';
 import { RefreshTokenEntity } from './src/modules/auth/entity/refresh-token.entity';
@@ -18,7 +19,12 @@ export const MikroOrmConfigFn: (
   user: configService.get<string>('DATABASE_USERNAME'),
   password: configService.get<string>('DATABASE_PASSWORD'),
   dbName: configService.get<string>('DATABASE_NAME'),
-  entities: [UserEntity, RefreshTokenEntity, PasswordTokenEntity],
+  entities: [
+    UserEntity,
+    RefreshTokenEntity,
+    PasswordTokenEntity,
+    UploadedFileEntity,
+  ],
   allowGlobalContext: true,
 });
 
