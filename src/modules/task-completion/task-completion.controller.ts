@@ -46,6 +46,7 @@ import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { InputSaveFilesDto } from 'src/core/dto/input.save-files.dto';
 import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
 import { InputUpdateTaskCompletionDto } from './dto/input.update-task-completion.dto';
+import { InputTaskComplitionPaginationDto } from './dto/input.task-completion-pagination.dto';
 
 @ApiTags('task-completion')
 @Controller('task-completion')
@@ -84,7 +85,7 @@ export class TaskCompletionController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
   findAll(
-    @Query() query: InputPaginationDto,
+    @Query() query: InputTaskComplitionPaginationDto,
   ): Promise<OutputPaginationDto<OutputUserDto>> {
     return this.taskCompletionService.findAll(query);
   }

@@ -11,6 +11,7 @@ import { handleNotFound, pagination } from 'src/core/utils/utils';
 import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { FilterQuery } from '@mikro-orm/core';
 import { InputUpdateTaskCompletionDto } from './dto/input.update-task-completion.dto';
+import { InputTaskComplitionPaginationDto } from './dto/input.task-completion-pagination.dto';
 
 @Injectable()
 export class TaskCompletionService {
@@ -40,10 +41,16 @@ export class TaskCompletionService {
   }
 
   public async findAll(
-    filters: InputPaginationDto,
+    filters: InputTaskComplitionPaginationDto,
   ): Promise<OutputPaginationDto<any>> {
     const query =
       this.taskCompletionRepository.createQueryBuilder('completion');
+    if (filters.rated === false) {
+      query.where({ points: null });
+    }
+    if (filters.rated === false) {
+      query.where({ points: { $not: null } });
+    }
     return pagination(filters, query, [], { default: 'completion.id' });
   }
 
