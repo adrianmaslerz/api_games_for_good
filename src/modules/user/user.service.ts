@@ -62,8 +62,8 @@ export class UserService {
 
   async remove(id: number) {
     let user = await this.userRepository.findOne({ id });
-    if (user) {
-      throw new BadRequestException(ErrorMessages.USER_EXISTS);
+    if (!user) {
+      throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
     }
     await this.userRepository.removeAndFlush(user);
     return true;
