@@ -4,6 +4,7 @@ import { IEnvironments } from './src/config/environments';
 import { PasswordTokenEntity } from './src/modules/auth/entity/password-token.entity';
 import { RefreshTokenEntity } from './src/modules/auth/entity/refresh-token.entity';
 import { UserEntity } from './src/modules/user/entity/user.entity';
+import {TaskEntity} from "./src/modules/tasks/entity/task.entity";
 
 const cs: ConfigService<IEnvironments> = new ConfigService();
 
@@ -18,7 +19,7 @@ export const MikroOrmConfigFn: (
   user: configService.get<string>('DATABASE_USERNAME'),
   password: configService.get<string>('DATABASE_PASSWORD'),
   dbName: configService.get<string>('DATABASE_NAME'),
-  entities: [UserEntity, RefreshTokenEntity, PasswordTokenEntity],
+  entities: [UserEntity, TaskEntity, RefreshTokenEntity, PasswordTokenEntity],
   allowGlobalContext: true,
 });
 

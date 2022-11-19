@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
 
-export class InputCreateMissionDto {
+export class InputCreateTaskDto {
   @ApiProperty()
   @IsNotEmpty()
   name: string;

@@ -1,15 +1,9 @@
-import {
-  BeforeCreate,
-  BeforeUpdate,
-  Entity,
-  Enum,
-  Property,
-} from '@mikro-orm/core';
+import { Entity, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../../../core/entity/base.entity';
-import { InputCreateMissionDto } from '../dto/input.create-mission.dto';
+import { InputCreateTaskDto } from '../dto/input.create-task.dto';
 
 @Entity()
-export class MissionEntity extends BaseEntity {
+export class TaskEntity extends BaseEntity {
   @Property()
   name: string;
 
@@ -19,14 +13,14 @@ export class MissionEntity extends BaseEntity {
   @Property()
   endDate: Date;
 
-  public updateProperties<T = InputCreateMissionDto>(
+  public updateProperties<T = InputCreateTaskDto>(
     newData: T,
     fields: Array<keyof T>,
   ): void {
     super.updateProperties(newData, fields);
   }
 
-  constructor(data: Partial<MissionEntity>) {
+  constructor(data: Partial<TaskEntity>) {
     super();
     Object.assign(this, { ...this, ...data });
   }
