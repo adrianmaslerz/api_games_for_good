@@ -5,8 +5,8 @@ import { IEnvironments } from './src/config/environments';
 import { PasswordTokenEntity } from './src/modules/auth/entity/password-token.entity';
 import { RefreshTokenEntity } from './src/modules/auth/entity/refresh-token.entity';
 import { UserEntity } from './src/modules/user/entity/user.entity';
-import { TaskCompletionEntity } from 'src/modules/task-completion/entity/task-completion.entity';
-import {TaskEntity} from "./src/modules/tasks/entity/task.entity";
+import { TaskEntity } from './src/modules/tasks/entity/task.entity';
+import { TaskCompletionEntity } from './src/modules/tasks/entity/task-completion.entity';
 
 const cs: ConfigService<IEnvironments> = new ConfigService();
 

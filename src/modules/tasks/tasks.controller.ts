@@ -9,6 +9,9 @@ import {
   Put,
   Delete,
   Query,
+  UploadedFiles,
+  HttpException,
+  ConflictException,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { InputCreateTaskDto } from './dto/input.create-task.dto';
@@ -16,6 +19,9 @@ import { InputCreateTaskDto } from './dto/input.create-task.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -30,14 +36,24 @@ import { ApiPaginationResponse } from '../../core/decorators/api-pagination-resp
 import { ErrorMessages } from '../../core/enums/error-messages.enum';
 import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
 import { InputGetTasksDto } from './dto/input.get-tasks.dto';
-import {SuccessOutputDTO} from "../../core/dto/output.success.dto";
+import { SuccessOutputDTO } from '../../core/dto/output.success.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { InputSaveFilesDto } from '../../core/dto/input.save-files.dto';
+import { OutputAuthTokensDto } from '../auth/dto/output.auth-token.dto';
+import { User } from '../../core/decorators/user.decorator';
+import { UserEntity } from '../user/entity/user.entity';
+import { TaskCompletionService } from './task-completion.service';
+import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
 @ApiBearerAuth()
 @UseGuards(AuthGuard())
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly taskCompletionService: TaskCompletionService,
+  ) {}
 
   @Post()
   @UseGuards(new RoleGuard(Roles.ADMIN))
@@ -94,5 +110,40 @@ export class TasksController {
   async remove(@Param('id') id: number) {
     await this.tasksService.remove(id);
     return new SuccessOutputDTO();
+  }
+
+  @Post(':id/complete')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiOperation({ description: 'complete task' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ description: 'files', type: InputSaveFilesDto })
+  @ApiCreatedResponse({
+    description: 'Object returned.',
+    type: OutputAuthTokensDto,
+  })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  public async completeTask(
+    @User() user: UserEntity,
+    @Param('id') id: number,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Body() input: InputCompleteTaskDto,
+  ): Promise<any> {
+    const task = await this.tasksService.findOne({ id });
+
+    const hasSubtasks = await this.tasksService.findOne({ parent: id }, false);
+    if (hasSubtasks) {
+      throw new ConflictException("You can't complete this task without ");
+    }
+    const exists = await this.taskCompletionService.findOne(
+      { task, user },
+      false,
+    );
+    if (exists) {
+      throw new ConflictException('Task already completed');
+    }
+
+    return (
+      await this.taskCompletionService.completeTask(user, task, files, input)
+    ).serialize();
   }
 }

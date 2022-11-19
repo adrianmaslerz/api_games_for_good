@@ -7,11 +7,9 @@ import {
   ManyToOne,
   Property,
 } from '@mikro-orm/core';
-import { Exclude } from 'class-transformer';
-import { Roles } from '../../../core/enums/roles.enum';
 import { BaseEntity } from '../../../core/entity/base.entity';
 import { FileTypes } from 'src/core/enums/file-types.enum';
-import { TaskCompletionEntity } from 'src/modules/task-completion/entity/task-completion.entity';
+import { TaskCompletionEntity } from '../../tasks/entity/task-completion.entity';
 
 @Entity()
 export class UploadedFileEntity extends BaseEntity {

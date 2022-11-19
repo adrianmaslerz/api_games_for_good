@@ -37,9 +37,14 @@ export class TasksService {
     });
   }
 
-  async findOne(filter: FilterQuery<TaskEntity>): Promise<TaskEntity> {
+  async findOne(
+    filter: FilterQuery<TaskEntity>,
+    handleNotFoundError = true,
+  ): Promise<TaskEntity> {
     const task = await this.tasksRepository.findOne(filter);
-    handleNotFound('tasks', task);
+    if (handleNotFoundError) {
+      handleNotFound('tasks', task);
+    }
     return task;
   }
 
