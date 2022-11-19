@@ -20,6 +20,11 @@ export const MikroOrmConfigFn: (
   dbName: configService.get<string>('DATABASE_NAME'),
   entities: [UserEntity, RefreshTokenEntity, PasswordTokenEntity],
   allowGlobalContext: true,
+  driverOptions: {
+    ...(process.env.NODE_ENV === 'production' && {
+      connection: { ssl: { rejectUnauthorized: false } },
+    }),
+  },
 });
 
 //for cli
