@@ -13,6 +13,9 @@ import { CreateUserDto } from '../dto/input.create-user.dto';
 
 @Entity()
 export class UserEntity extends BaseEntity {
+  @Property({ default: '' })
+  username: string;
+
   @Property({ unique: true })
   email: string;
 
