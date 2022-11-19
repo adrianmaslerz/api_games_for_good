@@ -26,6 +26,12 @@ export const MikroOrmConfigFn: (
     UploadedFileEntity,
   ],
   allowGlobalContext: true,
+  migrations: { disableForeignKeys: false },
+  driverOptions: {
+    ...(process.env.NODE_ENV === 'production' && {
+      connection: { ssl: { rejectUnauthorized: false } },
+    }),
+  },
 });
 
 //for cli

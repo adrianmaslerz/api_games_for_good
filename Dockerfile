@@ -24,6 +24,6 @@ COPY tsconfig.json $APP_DIR/tsconfig.json
 RUN npm i -g @nestjs/cli
 RUN npm link webpack
 RUN nest build
-RUN npm run update-schema
+# RUN npm run update-schema
 
-CMD [ "node", "dist/src/main" ]
+CMD [ "npm", "run", "start:prod" ]
