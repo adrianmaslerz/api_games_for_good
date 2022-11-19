@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+  app:
+    container_name: app
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./package.json:/usr/src/app/package.json
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: npm run start:dev
+
+  db:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: hackathon
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Giraffe123!
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  adminer:
+      image: adminer
+      restart: always
+      ports:
+        - 8080:8080
+volumes:
+  db:
+
