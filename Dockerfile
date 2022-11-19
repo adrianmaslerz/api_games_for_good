@@ -1,4 +1,4 @@
-FROM node:14.15.4-alpine
+FROM node:18.12.1-alpine
 RUN apk update && apk add bash && apk add curl
 
 #create workdir
@@ -21,8 +21,7 @@ COPY tsconfig.build.json $APP_DIR/tsconfig.build.json
 COPY tsconfig.json $APP_DIR/tsconfig.json
 
 #install globals
-RUN npm i -g @nestjs/cli
-RUN npm link webpack
+RUN npm i -g @nestjs/cli @mikro-orm/cli
 RUN nest build
 # RUN npm run update-schema
 

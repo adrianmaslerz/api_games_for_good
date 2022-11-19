@@ -5,6 +5,7 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { IEnvironments } from 'src/config/environments';
+declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -32,5 +33,11 @@ async function bootstrap() {
   app.enableCors();
 
   await app.listen(configService.get('APP_PORT'));
+  console.log('App listens to port ' + configService.get('APP_PORT'));
+
+  if (module.hot) {
+    module.hot.accept();
+    module.hot.dispose(() => app.close());
+  }
 }
 bootstrap();
