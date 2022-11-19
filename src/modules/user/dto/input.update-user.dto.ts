@@ -1,18 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { Roles } from '../../../core/enums/roles.enum';
 import { IsEnum, NoWhiteSpace } from '../../../core/utils/validators';
 
 export class UpdateUserDto {
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
+  @IsString()
+  username: string;
+
+  @ApiProperty()
+  @IsOptional()
   @IsString()
   @NoWhiteSpace()
-  @Min(8)
+  @MinLength(8)
   password: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(Roles)
   role: Roles;
 }

@@ -6,6 +6,11 @@ import { IsEnum, NoWhiteSpace } from '../../../core/utils/validators';
 export class CreateUserDto {
   @ApiProperty()
   @IsNotEmpty()
+  @IsString()
+  username: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
   @IsEmail()
   email: string;
 

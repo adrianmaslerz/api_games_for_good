@@ -55,7 +55,7 @@ export class UserService {
     if (!user) {
       throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
     }
-    user.updateProperties(data, ['password', 'role']);
+    user.updateProperties(data, ['password', 'role', 'username']);
     await this.userRepository.flush();
     return user;
   }
