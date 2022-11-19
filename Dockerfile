@@ -23,5 +23,6 @@ COPY tsconfig.json $APP_DIR/tsconfig.json
 #install globals
 RUN npm i -g @nestjs/cli @mikro-orm/cli
 RUN nest build
+# RUN npm run update-schema
 
-CMD [ "node", "dist/main" ]
+CMD [ "npm", "run", "start:prod" ]

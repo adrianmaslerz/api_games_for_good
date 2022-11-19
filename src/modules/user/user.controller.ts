@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/input.create-user.dto';
 import { UpdateUserDto } from './dto/input.update-user.dto';
@@ -46,7 +59,10 @@ export class UserController {
   @UseGuards(new RoleGuard(Roles.ADMIN))
   @Get()
   @ApiOperation({ description: 'Get all' })
-  @ApiPaginationResponse({ description: 'Objects returned.', type: OutputUserDto })
+  @ApiPaginationResponse({
+    description: 'Objects returned.',
+    type: OutputUserDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
   findAll(): Promise<OutputPaginationDto<OutputUserDto>> {
@@ -59,7 +75,7 @@ export class UserController {
   @ApiOkResponse({ description: 'Object returned.', type: OutputUserDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   public me(@User() user: UserEntity): OutputUserDto {
-    return user;
+    return user.serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))
@@ -68,8 +84,8 @@ export class UserController {
   @ApiOkResponse({ description: 'Poop returned.', type: OutputUserDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiNotFoundResponse({ description: 'Poop not found.' })
-  findOne(@Param('id') id: number) {
-    return this.userService.findOne({ id });
+  async findOne(@Param('id') id: number) {
+    return (await this.userService.findOne({ id })).serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))
@@ -78,8 +94,8 @@ export class UserController {
   @ApiOkResponse({ description: 'User updated.', type: OutputUserDto })
   @ApiBadRequestResponse({ description: 'Validation failed.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
-  update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return (await this.userService.update(id, updateUserDto)).serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))
