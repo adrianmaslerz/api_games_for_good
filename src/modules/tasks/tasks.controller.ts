@@ -50,7 +50,6 @@ export class TasksController {
   }
 
   @Get()
-  @UseGuards(new RoleGuard(Roles.ADMIN))
   @ApiOperation({ description: 'Get all' })
   @ApiPaginationResponse({
     description: 'Objects returned.',
@@ -64,7 +63,6 @@ export class TasksController {
     return this.tasksService.findAll(query);
   }
 
-  @UseGuards(new RoleGuard(Roles.ADMIN))
   @Get(':id')
   @ApiOperation({ description: 'Get by id' })
   @ApiOkResponse({ description: 'Poop returned.', type: OutputTaskDto })
