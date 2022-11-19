@@ -1,25 +1,27 @@
 version: "3.7"
 services:
-  app:
-    container_name: app
-    build: .
-    restart: always
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./src:/usr/src/app/src
-      - ./package.json:/usr/src/app/package.json
-      - ./mikro-orm.config.ts:/usr/src/app/mikro-orm.config.ts
-    env_file:
-      - .env
-    depends_on:
-      - db
-    command: npm run start:dev
+#  app:
+#    container_name: app
+#    build: .
+#    restart: always
+#    ports:
+#      - "8000:8000"
+#    volumes:
+#      - ./src:/usr/src/app/src
+#      - ./package.json:/usr/src/app/package.json
+#      - ./mikro-orm.config.ts:/usr/src/app/mikro-orm.config.ts
+#    env_file:
+#      - .env
+#    depends_on:
+#      - db
+#    command: npm run start:dev
 
   db:
     container_name: db
     image: postgres
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: hackathon
       POSTGRES_USER: postgres

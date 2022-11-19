@@ -1,17 +1,45 @@
-import { Entity, Property } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../../../core/entity/base.entity';
 import { InputCreateTaskDto } from '../dto/input.create-task.dto';
+
+export enum TaskType {
+  TASK = 'task',
+  MISSION = 'mission',
+}
 
 @Entity()
 export class TaskEntity extends BaseEntity {
   @Property()
   name: string;
 
-  @Property()
-  startDate: Date;
+  @Enum(() => TaskType)
+  type: TaskType;
+
+  @ManyToOne({
+    nullable: true,
+  })
+  parent?: TaskEntity;
+
+  @Property({
+    nullable: true,
+  })
+  logo?: string;
 
   @Property()
-  endDate: Date;
+  description: string;
+
+  @Property()
+  color: string;
+
+  @Property({
+    default: 0,
+  })
+  points: number;
+
+  @Property({
+    nullable: true,
+  })
+  date?: Date;
 
   public updateProperties<T = InputCreateTaskDto>(
     newData: T,
