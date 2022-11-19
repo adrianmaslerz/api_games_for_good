@@ -5,13 +5,14 @@ import { FileTypes } from 'src/core/enums/file-types.enum';
 import { UploadService } from '../upload/upload.service';
 import { UserEntity } from '../user/entity/user.entity';
 import { TaskCompletionEntity } from './entity/task-completion.entity';
-import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
 import { handleNotFound, pagination } from 'src/core/utils/utils';
-import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { FilterQuery } from '@mikro-orm/core';
-import { InputUpdateTaskCompletionDto } from './dto/input.update-task-completion.dto';
-import { InputTaskComplitionPaginationDto } from './dto/input.task-completion-pagination.dto';
+import { InputUpdateTaskCompletionDto } from '../tasks/dto/input.update-task-completion.dto';
+import { InputTaskComplitionPaginationDto } from '../tasks/dto/input.task-completion-pagination.dto';
+import { TasksService } from './tasks.service';
+import { TaskEntity } from './entity/task.entity';
+import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
 
 @Injectable()
 export class TaskCompletionService {
@@ -23,17 +24,20 @@ export class TaskCompletionService {
 
   public async completeTask(
     user: UserEntity,
-    task: { id: number },
+    task: TaskEntity,
     files: Express.Multer.File[],
+    data: InputCompleteTaskDto,
   ) {
     const uploadedFiles = await Promise.all(
-      files.map((file) =>
+      (files || []).map((file) =>
         this.uploadService.save('tasks', file, FileTypes.IMAGE),
       ),
     );
     const result = this.taskCompletionRepository.create({
       uploadedFiles,
       user,
+      task,
+      ...data,
     });
     await this.taskCompletionRepository.persistAndFlush(result);
 
@@ -56,9 +60,12 @@ export class TaskCompletionService {
 
   async findOne(
     filter: FilterQuery<TaskCompletionEntity>,
+    handleNotFoundError = true,
   ): Promise<TaskCompletionEntity> {
     const completion = await this.taskCompletionRepository.findOne(filter);
-    handleNotFound('task completion', completion);
+    if (handleNotFoundError) {
+      handleNotFound('task completion', completion);
+    }
     return completion;
   }
 
