@@ -11,6 +11,10 @@ export interface IEnvironments {
   JWT_REFRESH_EXPIRATION_TIME: string;
   SENDGRID_KEY: string;
   SENDGRID_SENDER_EMAIL: string;
+  AWS_S3_BUCKET_ENDPOINT: string;
+  AWS_S3_BUCKET_NAME: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
 }
 
 export const environments = () => ({
@@ -26,4 +30,8 @@ export const environments = () => ({
   JWT_REFRESH_EXPIRATION_TIME: process.env.JWT_REFRESH_EXPIRATION_TIME,
   SENDGRID_KEY: process.env.SENDGRID_KEY,
   SENDGRID_SENDER_EMAIL: process.env.SENDGRID_SENDER_EMAIL,
+  AWS_S3_BUCKET_ENDPOINT: process.env.AWS_S3_BUCKET_ENDPOINT,
+  AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
 });
