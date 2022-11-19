@@ -6,6 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MikroOrmConfigFn } from 'mikro-orm.config';
 import { environments, IEnvironments } from './config/environments';
 import { AuthModule } from './modules/auth/auth.module';
+import { SharedModule } from './modules/shared.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
@@ -27,6 +28,7 @@ import { UserModule } from './modules/user/user.module';
     HttpModule,
     AuthModule,
     UserModule,
+    SharedModule,
   ],
 })
 export class AppModule {}

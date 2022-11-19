@@ -9,6 +9,8 @@ export interface IEnvironments {
   JWT_EXPIRATION_TIME: number;
   FORGOT_PASSWORD_URL: string;
   JWT_REFRESH_EXPIRATION_TIME: string;
+  SENDGRID_KEY: string;
+  SENDGRID_SENDER_EMAIL: string;
 }
 
 export const environments = () => ({
@@ -22,4 +24,6 @@ export const environments = () => ({
   JWT_EXPIRATION_TIME: process.env.JWT_EXPIRATION_TIME,
   FORGOT_PASSWORD_URL: process.env.FORGOT_PASSWORD_URL,
   JWT_REFRESH_EXPIRATION_TIME: process.env.JWT_REFRESH_EXPIRATION_TIME,
+  SENDGRID_KEY: process.env.SENDGRID_KEY,
+  SENDGRID_SENDER_EMAIL: process.env.SENDGRID_SENDER_EMAIL,
 });

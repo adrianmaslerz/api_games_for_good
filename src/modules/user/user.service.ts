@@ -1,8 +1,15 @@
 import { FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
-import { BadRequestException, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
+import { Roles } from 'src/core/enums/roles.enum';
+import { EmailService } from 'src/core/services/email.service';
 import { ErrorMessages } from '../../core/enums/error-messages.enum';
 import { handleNotFound, pagination } from '../../core/utils/utils';
 import { CreateUserDto } from './dto/input.create-user.dto';
@@ -12,7 +19,11 @@ import { UserEntity } from './entity/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(UserEntity) private readonly userRepository: EntityRepository<UserEntity>) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: EntityRepository<UserEntity>,
+    private emailService: EmailService,
+  ) {}
 
   async create(data: CreateUserDto) {
     let user = await this.userRepository.findOne({ email: data.email });
@@ -21,12 +32,15 @@ export class UserService {
     }
     user = this.userRepository.create(data);
     await this.userRepository.persistAndFlush(user);
+    await this.emailService.welomeUser(data.email, { password: data.password });
     return user;
   }
 
   async findAll(): Promise<OutputPaginationDto<OutputUserDto>> {
     const query = this.userRepository.createQueryBuilder('user');
-    const data = await pagination({ limit: 10, offset: 0 }, query, [], { default: 'user.id' });
+    const data = await pagination({ limit: 10, offset: 0 }, query, [], {
+      default: 'user.id',
+    });
     return data;
   }
 
