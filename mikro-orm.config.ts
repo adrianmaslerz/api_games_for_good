@@ -6,6 +6,7 @@ import { PasswordTokenEntity } from './src/modules/auth/entity/password-token.en
 import { RefreshTokenEntity } from './src/modules/auth/entity/refresh-token.entity';
 import { UserEntity } from './src/modules/user/entity/user.entity';
 import { TaskCompletionEntity } from 'src/modules/task-completion/entity/task-completion.entity';
+import {TaskEntity} from "./src/modules/tasks/entity/task.entity";
 
 const cs: ConfigService<IEnvironments> = new ConfigService();
 
@@ -22,6 +23,7 @@ export const MikroOrmConfigFn: (
   dbName: configService.get<string>('DATABASE_NAME'),
   entities: [
     UserEntity,
+    TaskEntity,
     RefreshTokenEntity,
     PasswordTokenEntity,
     UploadedFileEntity,
