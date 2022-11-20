@@ -61,4 +61,14 @@ export class InputCreateTaskDto {
   @IsInt()
   @ValidateIf((object, value) => value !== null && value !== undefined)
   points: number;
+
+  @ApiProperty()
+  @IsNotEmpty({
+    message: 'The $property is required.',
+  })
+  knowledgePill: string;
+
+  @ApiProperty()
+  @IsOptional()
+  recurring: string;
 }

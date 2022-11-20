@@ -41,6 +41,14 @@ export class TaskEntity extends BaseEntity {
   })
   date?: Date;
 
+  @Property()
+  knowledgePill: string;
+
+  @Property({
+    default: false,
+  })
+  recurring: boolean;
+
   public updateProperties<T = InputCreateTaskDto>(
     newData: T,
     fields: Array<keyof T>,

@@ -41,6 +41,12 @@ export class OutputTaskDto {
   @ApiProperty()
   updatedAt: Date;
 
+  @ApiProperty()
+  knowledgePill: string;
+
+  @ApiProperty()
+  recurring: boolean;
+
   @ApiPropertyOptional()
   childrenCount: number;
 }
