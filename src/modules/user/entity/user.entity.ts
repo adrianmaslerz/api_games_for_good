@@ -3,6 +3,8 @@ import {
   BeforeUpdate,
   Entity,
   Enum,
+  ManyToOne,
+  OneToOne,
   Property,
 } from '@mikro-orm/core';
 import { Exclude } from 'class-transformer';
@@ -10,6 +12,8 @@ import { Roles } from '../../../core/enums/roles.enum';
 import { BaseEntity } from '../../../core/entity/base.entity';
 import { hashPassword } from '../../../core/utils/utils';
 import { CreateUserDto } from '../dto/input.create-user.dto';
+import { UploadedFile } from '@nestjs/common';
+import { UploadedFileEntity } from 'src/modules/upload/entity/uploaded-file.entity';
 
 @Entity()
 export class UserEntity extends BaseEntity {
@@ -25,6 +29,15 @@ export class UserEntity extends BaseEntity {
 
   @Enum({ items: () => Roles, default: Roles.USER })
   role: Roles = Roles.USER;
+
+  @ManyToOne(() => UploadedFileEntity, {
+    nullable: true,
+    serializer: (file) => {
+      console.log('serializing', file);
+      return file;
+    },
+  })
+  profilePhoto: UploadedFileEntity;
 
   @BeforeCreate()
   @BeforeUpdate()

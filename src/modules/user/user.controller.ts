@@ -20,6 +20,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -38,6 +39,8 @@ import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
 import { InputSaveFileDto } from 'src/core/dto/input.save-file.dto';
 import { FileTypeValidator } from 'src/core/utils/validators';
 import { FileTypes } from 'src/core/enums/file-types.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadService } from '../upload/upload.service';
 
 @ApiTags('user')
 @Controller('user')
@@ -54,6 +57,19 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   async create(@Body() createUserDto: CreateUserDto) {
     return (await this.userService.create(createUserDto)).serialize();
+  }
+
+  @Post('profile-photo')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ description: 'complete task' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ description: 'files', type: InputSaveFileDto })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  public async uploadProfilePhoto(
+    @User() user: UserEntity,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<any> {
+    return this.userService.addProfilePhoto(user, file);
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))

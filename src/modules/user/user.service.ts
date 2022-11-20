@@ -8,10 +8,13 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
+import { FileTypes } from 'src/core/enums/file-types.enum';
 import { Roles } from 'src/core/enums/roles.enum';
 import { EmailService } from 'src/core/services/email.service';
 import { ErrorMessages } from '../../core/enums/error-messages.enum';
 import { handleNotFound, pagination } from '../../core/utils/utils';
+import { UploadedFileEntity } from '../upload/entity/uploaded-file.entity';
+import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto/input.create-user.dto';
 import { UpdateUserDto } from './dto/input.update-user.dto';
 import { OutputUserDto } from './dto/output.user.dto';
@@ -23,6 +26,7 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: EntityRepository<UserEntity>,
     private emailService: EmailService,
+    private uploadService: UploadService,
   ) {}
 
   async create(data: CreateUserDto) {
@@ -56,6 +60,17 @@ export class UserService {
       throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
     }
     user.updateProperties(data, ['password', 'role', 'username']);
+    await this.userRepository.flush();
+    return user;
+  }
+
+  async addProfilePhoto(user: UserEntity, file: Express.Multer.File) {
+    const uploadedFile = await this.uploadService.save(
+      'profile',
+      file,
+      FileTypes.IMAGE,
+    );
+    user.profilePhoto = uploadedFile;
     await this.userRepository.flush();
     return user;
   }
