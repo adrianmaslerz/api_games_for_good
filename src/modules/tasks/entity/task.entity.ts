@@ -26,7 +26,7 @@ export class TaskEntity extends BaseEntity {
 
   @ManyToOne(() => UploadedFileEntity, {
     nullable: true,
-    serializer: (file) => file.url,
+    serializer: (file) => file?.url,
   })
   logo?: UploadedFileEntity;
 

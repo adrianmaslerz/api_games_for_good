@@ -1,4 +1,4 @@
-import { FilterQuery } from '@mikro-orm/core';
+import { FilterQuery, MikroORM } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
@@ -15,6 +15,7 @@ import { FileTypes } from 'src/core/enums/file-types.enum';
 @Injectable()
 export class TasksService {
   constructor(
+    private mikroORM: MikroORM,
     @InjectRepository(TaskEntity)
     private readonly tasksRepository: EntityRepository<TaskEntity>,
     private uploadService: UploadService,
@@ -30,35 +31,30 @@ export class TasksService {
   }
 
   async findAll(data: InputGetTasksDto): Promise<any> {
-    const children = (
-      await this.tasksRepository
-        .createQueryBuilder('t')
-        .select(['COUNT(t.id) as id', 't.parent_id'])
-        .where('t.parent_id IS NOT NULL')
-        .groupBy(['t.parent_id'])
-        .getResultList()
-    ).map((el: any) => el.toPlain());
+    const knex = this.tasksRepository.getKnex();
+    const subquery = this.tasksRepository
+      .createQueryBuilder('s')
+      .select(['COUNT(s.id) as id'])
+      .where({ parent_id: knex.ref('t.id') })
+      .as('childrenCount');
 
     const query = this.tasksRepository.createQueryBuilder('t');
+
+    query.select(['*', subquery]);
+
     query.andWhere({ parent: data.parent ? data.parent : null });
+    query.orderBy({ id: 'ASC' });
 
     if (Object.values(TaskType).includes(data.type)) {
       query.andWhere({ type: data.type });
     }
 
-    const results = await pagination({ limit: 10000, offset: 0 }, query, [], {
-      default: 't.id',
-    });
+    const resultData = await query.execute();
 
-    results.results = results.results.map((result) => {
-      return {
-        ...result,
-        childrenCount:
-          children.find((child) => child.parent == result.id)?.id || 0,
-      };
-    });
-
-    return results;
+    return resultData.map((el) => ({
+      ...this.mikroORM.em.map(TaskEntity, el).serialize(),
+      childrenCount: parseInt(el.childrenCount),
+    }));
   }
 
   async findOne(
