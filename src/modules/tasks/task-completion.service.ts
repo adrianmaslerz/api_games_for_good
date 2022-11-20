@@ -118,7 +118,8 @@ export class TaskCompletionService {
       populate: ['task'] as any,
     });
     completion.status = status;
-    completion.points = completion.task.points;
+    completion.points =
+      status == TaskCompletionStatus.ACCEPTED ? completion.task.points : 0;
     await this.taskCompletionRepository.flush();
     return completion;
   }
