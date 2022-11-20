@@ -40,7 +40,6 @@ export class UserEntity extends BaseEntity {
   profilePhoto: UploadedFileEntity;
 
   @BeforeCreate()
-  @BeforeUpdate()
   hashPassword() {
     if (this.password) {
       this.password = hashPassword(this.password);

@@ -14,7 +14,11 @@ import { FileTypes } from 'src/core/enums/file-types.enum';
 import { Roles } from 'src/core/enums/roles.enum';
 import { EmailService } from 'src/core/services/email.service';
 import { ErrorMessages } from '../../core/enums/error-messages.enum';
-import { handleNotFound, pagination } from '../../core/utils/utils';
+import {
+  handleNotFound,
+  hashPassword,
+  pagination,
+} from '../../core/utils/utils';
 import { UploadedFileEntity } from '../upload/entity/uploaded-file.entity';
 import { UploadService } from '../upload/upload.service';
 import { CreateUserDto } from './dto/input.create-user.dto';
@@ -66,10 +70,10 @@ export class UserService {
     if (authuser.role != Roles.ADMIN && authuser.id != user.id) {
       throw new ForbiddenException();
     }
-    user.updateProperties(data, ['password', 'role', 'username']);
-    if (!data.password) {
-      delete user.password;
+    if (data.password) {
+      data.password = hashPassword(data.password);
     }
+    user.updateProperties(data, ['password', 'role', 'username']);
     await this.userRepository.flush();
     return user;
   }
@@ -81,7 +85,6 @@ export class UserService {
       FileTypes.IMAGE,
     );
     user.profilePhoto = uploadedFile;
-    delete user.password;
     await this.userRepository.flush();
     return user;
   }
