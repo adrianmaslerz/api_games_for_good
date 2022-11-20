@@ -25,9 +25,8 @@ export class InputCreateTaskDto {
   })
   name: string;
 
-  @ApiProperty()
-  @IsNumberString()
-  @ValidateIf((object, value) => value !== null && value !== undefined)
+  @ApiProperty({ required: false })
+  @IsOptional()
   parent: number;
 
   @ApiProperty()
