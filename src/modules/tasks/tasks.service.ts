@@ -22,19 +22,36 @@ export class TasksService {
     return task;
   }
 
-  async findAll(
-    data: InputGetTasksDto,
-  ): Promise<OutputPaginationDto<OutputTaskDto>> {
-    const query = this.tasksRepository.createQueryBuilder('tasks');
+  async findAll(data: InputGetTasksDto): Promise<any> {
+    const children = (
+      await this.tasksRepository
+        .createQueryBuilder('t')
+        .select(['COUNT(t.id) as id', 't.parent_id'])
+        .where('t.parent_id IS NOT NULL')
+        .groupBy(['t.parent_id'])
+        .getResultList()
+    ).map((el: any) => el.toPlain());
+
+    const query = this.tasksRepository.createQueryBuilder('t');
     query.andWhere({ parent: data.parent ? data.parent : null });
 
     if (Object.values(TaskType).includes(data.type)) {
       query.andWhere({ type: data.type });
     }
 
-    return await pagination({ limit: 10000, offset: 0 }, query, [], {
-      default: 'tasks.id',
+    const results = await pagination({ limit: 10000, offset: 0 }, query, [], {
+      default: 't.id',
     });
+
+    results.results = results.results.map((result) => {
+      return {
+        ...result,
+        childrenCount:
+          children.find((child) => child.parent == result.id)?.id || 0,
+      };
+    });
+
+    return results;
   }
 
   async findOne(
