@@ -42,8 +42,15 @@ import { InputSaveFilesDto } from '../../core/dto/input.save-files.dto';
 import { OutputAuthTokensDto } from '../auth/dto/output.auth-token.dto';
 import { User } from '../../core/decorators/user.decorator';
 import { UserEntity } from '../user/entity/user.entity';
-import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
-import {TaskCompletionService} from "./task-completion.service";
+import { TaskCompletionService } from './task-completion.service';
+import {
+  InputCompleteTaskDto,
+  InputCompleteTaskDtoWithFile,
+} from './dto/input.complete-task.dto';
+import { InputSetTaskStatusDto } from './dto/input.set-task-status.dto';
+import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
+import { InputIdDto } from 'src/core/dto/input.id.dto';
+import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -79,6 +86,15 @@ export class TasksController {
     return this.tasksService.findAll(query);
   }
 
+  @Get(':id/leaderboard')
+  @ApiOperation({ description: 'Get leaderboard' })
+  @ApiOkResponse({ type: OutputLeaderboardDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
+  leaderboard(@Param('id') id: number): Promise<OutputLeaderboardDto> {
+    return this.taskCompletionService.getLeaderBoard(id);
+  }
+
   @Get(':id')
   @ApiOperation({ description: 'Get by id' })
   @ApiOkResponse({ description: 'Poop returned.', type: OutputTaskDto })
@@ -86,6 +102,24 @@ export class TasksController {
   @ApiNotFoundResponse({ description: 'Poop not found.' })
   findOne(@Param('id') id: number) {
     return this.tasksService.findOne({ id });
+  }
+
+  @UseGuards(new RoleGuard(Roles.ADMIN))
+  @Put('complition/:id/set-status')
+  @ApiOperation({ description: 'Update tasks' })
+  @ApiOkResponse({
+    description: 'Mission updated.',
+    type: OutputTaskCompletionDto,
+  })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  async setStatus(
+    @Param('id') id: number,
+    @Body() data: InputSetTaskStatusDto,
+  ) {
+    return (
+      await this.taskCompletionService.setStatus(id, data.status)
+    ).serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))
@@ -116,7 +150,7 @@ export class TasksController {
   @UseInterceptors(FilesInterceptor('files'))
   @ApiOperation({ description: 'complete task' })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ description: 'files', type: InputSaveFilesDto })
+  @ApiBody({ description: 'files', type: InputCompleteTaskDtoWithFile })
   @ApiCreatedResponse({
     description: 'Object returned.',
     type: OutputAuthTokensDto,
@@ -129,7 +163,6 @@ export class TasksController {
     @Body() input: InputCompleteTaskDto,
   ): Promise<any> {
     const task = await this.tasksService.findOne({ id });
-
     const hasSubtasks = await this.tasksService.findOne({ parent: id }, false);
     if (hasSubtasks && !task.recurring) {
       throw new ConflictException("You can't complete this task without ");

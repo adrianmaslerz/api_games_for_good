@@ -1,6 +1,8 @@
-import { Entity, Enum, ManyToOne, Property } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
+import { Exclude } from 'class-transformer';
 import { BaseEntity } from '../../../core/entity/base.entity';
 import { InputCreateTaskDto } from '../dto/input.create-task.dto';
+import { TaskCompletionEntity } from './task-completion.entity';
 
 export enum TaskType {
   TASK = 'task',
@@ -41,7 +43,11 @@ export class TaskEntity extends BaseEntity {
   })
   date?: Date;
 
-  @Property()
+  @Exclude()
+  @OneToMany(() => TaskCompletionEntity, 'task', { hidden: true })
+  completions: TaskCompletionEntity[];
+
+  @Property({ nullable: true })
   knowledgePill: string;
 
   @Property({

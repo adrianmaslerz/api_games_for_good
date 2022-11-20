@@ -1,10 +1,19 @@
 import { EntityRepository } from '@mikro-orm/postgresql';
+import { FindOneOptions, MikroORM } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { FileTypes } from 'src/core/enums/file-types.enum';
 import { UploadService } from '../upload/upload.service';
 import { UserEntity } from '../user/entity/user.entity';
-import { TaskCompletionEntity } from './entity/task-completion.entity';
+import {
+  TaskCompletionEntity,
+  TaskCompletionStatus,
+} from './entity/task-completion.entity';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
 import { handleNotFound, pagination } from 'src/core/utils/utils';
 import { FilterQuery } from '@mikro-orm/core';
@@ -13,13 +22,19 @@ import { InputTaskComplitionPaginationDto } from '../tasks/dto/input.task-comple
 import { TasksService } from './tasks.service';
 import { TaskEntity } from './entity/task.entity';
 import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
+import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 
 @Injectable()
 export class TaskCompletionService {
   constructor(
+    private microORM: MikroORM,
     private uploadService: UploadService,
+    @Inject(forwardRef(() => TasksService))
+    private taskService: TasksService,
     @InjectRepository(TaskCompletionEntity)
     private readonly taskCompletionRepository: EntityRepository<TaskCompletionEntity>,
+    @InjectRepository(TaskEntity)
+    private readonly taskRepository: EntityRepository<TaskEntity>,
   ) {}
 
   public async completeTask(
@@ -28,6 +43,23 @@ export class TaskCompletionService {
     files: Express.Multer.File[],
     data: InputCompleteTaskDto,
   ) {
+    const hasSubtasks =
+      (await this.taskRepository
+        .createQueryBuilder('task')
+        .leftJoin(`task.completions`, 'completions')
+        .leftJoin('completions.user', 'user')
+        .where(`"completions"."status" <> '${TaskCompletionStatus.ACCEPTED}'`)
+        .andWhere(`"user"."id" = ${user.id}`)
+        .getCount()) > 0;
+
+    if (hasSubtasks) {
+      throw new ConflictException("You can't complete this task without ");
+    }
+    const exists = await this.findOne({ task, user }, false);
+    if (exists) {
+      throw new ConflictException('Task already completed');
+    }
+
     const uploadedFiles = await Promise.all(
       (files || []).map((file) =>
         this.uploadService.save('tasks', file, FileTypes.IMAGE),
@@ -40,7 +72,6 @@ export class TaskCompletionService {
       ...data,
     });
     await this.taskCompletionRepository.persistAndFlush(result);
-
     return result;
   }
 
@@ -61,8 +92,12 @@ export class TaskCompletionService {
   async findOne(
     filter: FilterQuery<TaskCompletionEntity>,
     handleNotFoundError = true,
+    options?: FindOneOptions<TaskCompletionEntity>,
   ): Promise<TaskCompletionEntity> {
-    const completion = await this.taskCompletionRepository.findOne(filter);
+    const completion = await this.taskCompletionRepository.findOne(
+      filter,
+      options,
+    );
     if (handleNotFoundError) {
       handleNotFound('task completion', completion);
     }
@@ -74,10 +109,65 @@ export class TaskCompletionService {
     data: InputUpdateTaskCompletionDto,
   ): Promise<TaskCompletionEntity> {
     const completion = await this.findOne({ id });
-    console.log(data);
     completion.updateProperties(data, ['points']);
-    console.log(completion);
     await this.taskCompletionRepository.flush();
     return completion;
+  }
+
+  async setStatus(id: number, status: TaskCompletionStatus) {
+    const completion = await this.findOne({ id }, true, {
+      populate: ['task'] as any,
+    });
+    completion.status = status;
+    completion.points =
+      status == TaskCompletionStatus.ACCEPTED ? completion.task.points : 0;
+    await this.taskCompletionRepository.flush();
+    return completion;
+  }
+
+  async getLeaderBoard(taskId: number): Promise<OutputLeaderboardDto> {
+    const knex = this.taskRepository.getKnex();
+
+    //get subtasks with recursive join
+    const allSubtasks = await knex
+      .withRecursive('tree', (qb) => {
+        qb.select(['task_entity.id', 'task_entity.parent_id'])
+          .from('task_entity')
+          .where('task_entity.id', taskId)
+
+          .union((qb) => {
+            qb.select(['task_entity.id', 'task_entity.parent_id'])
+              .from('task_entity')
+              .join('tree', 'tree.id', 'task_entity.parent_id');
+          });
+      })
+      .select(['tree.id', 'tree.parent_id'])
+      .from('tree');
+
+    //get user with points sum (raw query)
+    const result = await this.taskCompletionRepository
+      .createQueryBuilder('completion')
+      .where({ task_id: { $in: allSubtasks.map((s) => s.id) } })
+      .select(['sum(points) as points_sum'])
+      .leftJoinAndSelect('completion.user', 'user')
+      .groupBy('user.id')
+      .getKnexQuery()
+      .orderBy('points_sum', 'desc')
+      .limit(1000);
+
+    //map raw data back to user entity with points_sum field
+    const users = result
+      .map((el) => {
+        const res = {};
+        Object.keys(el).forEach((key) => {
+          res[key.replace('user__', '')] = el[key];
+        });
+        return res;
+      })
+      .map((user) => ({
+        ...this.microORM.em.map(UserEntity, user).serialize(),
+        points_sum: user.points_sum,
+      }));
+    return users;
   }
 }

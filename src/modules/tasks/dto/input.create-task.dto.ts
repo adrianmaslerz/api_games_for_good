@@ -9,9 +9,9 @@ import {
   IsNumberString,
   IsOptional,
   MaxLength,
-  ValidateIf
+  ValidateIf,
 } from 'class-validator';
-import {TaskType} from "../entity/task.entity";
+import { TaskType } from '../entity/task.entity';
 
 export class InputCreateTaskDto {
   @ApiProperty({
