@@ -6,6 +6,7 @@ import { PasswordTokenEntity } from './src/modules/auth/entity/password-token.en
 import { RefreshTokenEntity } from './src/modules/auth/entity/refresh-token.entity';
 import { UserEntity } from './src/modules/user/entity/user.entity';
 import { TaskEntity } from './src/modules/tasks/entity/task.entity';
+import { CommentEntity } from './src/modules/comments/entity/comment.entity';
 import { TaskCompletionEntity } from './src/modules/tasks/entity/task-completion.entity';
 
 const cs: ConfigService<IEnvironments> = new ConfigService();
@@ -28,6 +29,7 @@ export const MikroOrmConfigFn: (
     PasswordTokenEntity,
     UploadedFileEntity,
     TaskCompletionEntity,
+    CommentEntity,
   ],
   allowGlobalContext: true,
   migrations: { disableForeignKeys: false },
