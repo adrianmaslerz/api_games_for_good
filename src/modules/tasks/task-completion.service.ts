@@ -23,6 +23,8 @@ import { TasksService } from './tasks.service';
 import { TaskEntity } from './entity/task.entity';
 import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
 import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
+import { UserService } from '../user/user.service';
+import { throws } from 'assert';
 
 @Injectable()
 export class TaskCompletionService {
@@ -35,6 +37,7 @@ export class TaskCompletionService {
     private readonly taskCompletionRepository: EntityRepository<TaskCompletionEntity>,
     @InjectRepository(TaskEntity)
     private readonly taskRepository: EntityRepository<TaskEntity>,
+    private userService: UserService,
   ) {}
 
   public async completeTask(
@@ -125,8 +128,13 @@ export class TaskCompletionService {
       populate: ['task'] as any,
     });
     completion.status = status;
+    await this.userService.addPoints(
+      completion.user.id,
+      -completion.points + completion.task.points,
+    );
     completion.points =
       status == TaskCompletionStatus.ACCEPTED ? completion.task.points : 0;
+
     await this.taskCompletionRepository.flush();
     return completion;
   }

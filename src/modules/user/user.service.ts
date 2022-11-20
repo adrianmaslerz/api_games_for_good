@@ -3,10 +3,12 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { throws } from 'assert';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
 import { FileTypes } from 'src/core/enums/file-types.enum';
 import { Roles } from 'src/core/enums/roles.enum';
@@ -56,10 +58,13 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, data: UpdateUserDto) {
+  async update(id: number, data: UpdateUserDto, authuser) {
     let user = await this.userRepository.findOne({ id });
     if (!user) {
       throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
+    }
+    if (authuser.role != Roles.ADMIN && authuser.id != user.id) {
+      throw new ForbiddenException();
     }
     user.updateProperties(data, ['password', 'role', 'username']);
     if (!data.password) {
@@ -79,6 +84,12 @@ export class UserService {
     delete user.password;
     await this.userRepository.flush();
     return user;
+  }
+
+  async addPoints(id: number, amount: number) {
+    const user = await this.findOne(id);
+    user.pointsEarned = user.pointsEarned + amount;
+    this.userRepository.flush();
   }
 
   async remove(id: number) {
