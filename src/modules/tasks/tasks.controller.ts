@@ -50,7 +50,6 @@ import {
 } from './dto/input.complete-task.dto';
 import { InputSetTaskStatusDto } from './dto/input.set-task-status.dto';
 import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
-import { InputIdDto } from 'src/core/dto/input.id.dto';
 import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
 import { InputSaveFileDto } from 'src/core/dto/input.save-file.dto';
@@ -126,9 +125,9 @@ export class TasksController {
 
   @Get(':id')
   @ApiOperation({ description: 'Get by id' })
-  @ApiOkResponse({ description: 'Poop returned.', type: OutputTaskDto })
+  @ApiOkResponse({ description: 'Task returned.', type: OutputTaskDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
-  @ApiNotFoundResponse({ description: 'Poop not found.' })
+  @ApiNotFoundResponse({ description: 'Task not found.' })
   findOne(@Param('id') id: number) {
     return this.tasksService.findOne({ id });
   }
@@ -154,7 +153,7 @@ export class TasksController {
   @UseGuards(new RoleGuard(Roles.ADMIN))
   @Put(':id')
   @ApiOperation({ description: 'Update tasks' })
-  @ApiOkResponse({ description: 'Mission updated.', type: OutputTaskDto })
+  @ApiOkResponse({ description: 'Task updated.', type: OutputTaskDto })
   @ApiBadRequestResponse({ description: 'Validation failed.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   async update(
@@ -167,7 +166,7 @@ export class TasksController {
   @UseGuards(new RoleGuard(Roles.ADMIN))
   @Delete(':id')
   @ApiOperation({ description: 'Remove tasks' })
-  @ApiOkResponse({ description: 'Mission removed.', type: Boolean })
+  @ApiOkResponse({ description: 'Task removed.', type: Boolean })
   @ApiBadRequestResponse({ description: 'Validation failed.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   async remove(@Param('id') id: number) {

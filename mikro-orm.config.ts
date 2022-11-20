@@ -8,6 +8,7 @@ import { UserEntity } from './src/modules/user/entity/user.entity';
 import { TaskEntity } from './src/modules/tasks/entity/task.entity';
 import { CommentEntity } from './src/modules/comments/entity/comment.entity';
 import { TaskCompletionEntity } from './src/modules/tasks/entity/task-completion.entity';
+import {RewardEntity} from "./src/modules/rewards/entity/reward.entity";
 
 const cs: ConfigService<IEnvironments> = new ConfigService();
 
@@ -30,6 +31,7 @@ export const MikroOrmConfigFn: (
     UploadedFileEntity,
     TaskCompletionEntity,
     CommentEntity,
+    RewardEntity
   ],
   allowGlobalContext: true,
   migrations: { disableForeignKeys: false },
