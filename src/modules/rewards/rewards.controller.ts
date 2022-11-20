@@ -1,9 +1,11 @@
 import {
   Body,
-  Controller, Get,
+  Controller, Delete,
+  Get,
   Param,
   Post,
-  Put, Query,
+  Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -12,7 +14,8 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
-  ApiConsumes, ApiNotFoundResponse,
+  ApiConsumes,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -28,11 +31,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { InputSaveFileDto } from '../../core/dto/input.save-file.dto';
 import { User } from '../../core/decorators/user.decorator';
 import { UserEntity } from '../user/entity/user.entity';
-import {ApiPaginationResponse} from "../../core/decorators/api-pagination-response.decorator";
-import {ErrorMessages} from "../../core/enums/error-messages.enum";
-import {InputGetTasksDto} from "../tasks/dto/input.get-tasks.dto";
-import {OutputPaginationDto} from "../../core/dto/output.pagination.dto";
-import {OutputRewardDto} from "./dto/output.reward.dto";
+import { ApiPaginationResponse } from '../../core/decorators/api-pagination-response.decorator';
+import { ErrorMessages } from '../../core/enums/error-messages.enum';
+import { InputGetTasksDto } from '../tasks/dto/input.get-tasks.dto';
+import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
+import { OutputRewardDto } from './dto/output.reward.dto';
+import { InputCreateTaskDto } from '../tasks/dto/input.create-task.dto';
+import { InputUpdateRewardDto } from './dto/input.update-reward.dto';
+import {SuccessOutputDTO} from "../../core/dto/output.success.dto";
 
 @ApiTags('Rewards')
 @Controller('rewards')
@@ -78,5 +84,35 @@ export class RewardsController {
   @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
   findAll(): Promise<OutputPaginationDto<OutputRewardDto>> {
     return this.rewardsService.findAll();
+  }
+
+  @UseGuards(new RoleGuard(Roles.ADMIN))
+  @Put(':id')
+  @ApiOperation({ description: 'Update reward' })
+  @ApiOkResponse({ description: 'Reward updated.', type: OutputRewardDto })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  async update(@Param('id') id: number, @Body() input: InputUpdateRewardDto) {
+    return (await this.rewardsService.update(id, input)).serialize();
+  }
+
+  @Get(':id')
+  @ApiOperation({ description: 'Get by id' })
+  @ApiOkResponse({ description: 'Reward returned.', type: OutputTaskDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  @ApiNotFoundResponse({ description: 'Reward not found.' })
+  findOne(@Param('id') id: number) {
+    return this.rewardsService.findOne({ id });
+  }
+
+  @UseGuards(new RoleGuard(Roles.ADMIN))
+  @Delete(':id')
+  @ApiOperation({ description: 'Remove reward' })
+  @ApiOkResponse({ description: 'Reward removed.', type: Boolean })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  async remove(@Param('id') id: number) {
+    await this.rewardsService.remove(id);
+    return new SuccessOutputDTO();
   }
 }

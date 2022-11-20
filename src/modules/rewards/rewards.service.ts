@@ -7,6 +7,7 @@ import { InputCreateRewardDto } from './dto/input.create-reward.dto';
 import { FileTypes } from '../../core/enums/file-types.enum';
 import { FilterQuery } from '@mikro-orm/core';
 import { handleNotFound, pagination } from '../../core/utils/utils';
+import {InputUpdateRewardDto} from "./dto/input.update-reward.dto";
 
 @Injectable()
 export class RewardsService {
@@ -48,10 +49,28 @@ export class RewardsService {
 
   async findAll(): Promise<any> {
     const query = this.rewardsRepository.createQueryBuilder('r');
-    const results = await pagination({ limit: 10000, offset: 0 }, query, [], {
-      default: 'r.id',
-    });
+    return await query.execute();
+  }
 
-    return results;
+  async update(id: number, data: InputUpdateRewardDto) {
+    const reward = await this.rewardsRepository.findOne({ id });
+    handleNotFound('rewards', reward);
+    reward.updateProperties(
+        data,
+        [
+          'name',
+          'description',
+          'points',
+        ],
+    );
+    await this.rewardsRepository.flush();
+    return reward;
+  }
+
+  async remove(id: number) {
+    const reward = await this.rewardsRepository.findOne({ id });
+    handleNotFound('rewards', reward);
+    await this.rewardsRepository.removeAndFlush(reward);
+    return true;
   }
 }
