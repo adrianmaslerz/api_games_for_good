@@ -3,6 +3,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   OnModuleDestroy,
   OnModuleInit,
@@ -56,10 +57,13 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, data: UpdateUserDto) {
+  async update(id: number, data: UpdateUserDto, authuser) {
     let user = await this.userRepository.findOne({ id });
     if (!user) {
       throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
+    }
+    if (authuser.role != Roles.ADMIN && authuser.id != user.id) {
+      throw new ForbiddenException();
     }
     user.updateProperties(data, ['password', 'role', 'username']);
     if (!data.password) {

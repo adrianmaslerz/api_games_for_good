@@ -104,14 +104,18 @@ export class UserController {
     return (await this.userService.findOne({ id })).serialize();
   }
 
-  @UseGuards(new RoleGuard(Roles.ADMIN))
+  // @UseGuards(new RoleGuard(Roles.ADMIN))
   @Put(':id')
   @ApiOperation({ description: 'Update user' })
   @ApiOkResponse({ description: 'User updated.', type: OutputUserDto })
   @ApiBadRequestResponse({ description: 'Validation failed.' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
-  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-    return (await this.userService.update(id, updateUserDto)).serialize();
+  async update(
+    @Param('id') id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: UserEntity,
+  ) {
+    return (await this.userService.update(id, updateUserDto, user)).serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))
