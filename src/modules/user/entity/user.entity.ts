@@ -23,6 +23,9 @@ export class UserEntity extends BaseEntity {
   @Property({ unique: true })
   email: string;
 
+  @Property({ default: 0 })
+  pointsEarned: number;
+
   @Property({ hidden: true, default: null, nullable: true })
   @Exclude()
   password: string;

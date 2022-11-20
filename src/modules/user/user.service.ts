@@ -8,6 +8,7 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
+import { throws } from 'assert';
 import { OutputPaginationDto } from 'src/core/dto/output.pagination.dto';
 import { FileTypes } from 'src/core/enums/file-types.enum';
 import { Roles } from 'src/core/enums/roles.enum';
@@ -83,6 +84,12 @@ export class UserService {
     delete user.password;
     await this.userRepository.flush();
     return user;
+  }
+
+  async addPoints(id: number, amount: number) {
+    const user = await this.findOne(id);
+    user.pointsEarned = user.pointsEarned + amount;
+    this.userRepository.flush();
   }
 
   async remove(id: number) {
