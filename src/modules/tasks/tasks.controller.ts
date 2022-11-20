@@ -128,8 +128,8 @@ export class TasksController {
   @ApiOkResponse({ description: 'Task returned.', type: OutputTaskDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiNotFoundResponse({ description: 'Task not found.' })
-  findOne(@Param('id') id: number) {
-    return this.tasksService.findOne({ id });
+  async findOne(@Param('id') id: number) {
+    return (await this.tasksService.findOne({ id })).serialize();
   }
 
   @UseGuards(new RoleGuard(Roles.ADMIN))

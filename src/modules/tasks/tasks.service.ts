@@ -41,6 +41,7 @@ export class TasksService {
     const query = this.tasksRepository.createQueryBuilder('t');
 
     query.select(['*', subquery]);
+    query.leftJoinAndSelect('t.logo', 'logo');
 
     query.andWhere({ parent: data.parent ? data.parent : null });
     query.orderBy({ id: 'ASC' });
@@ -61,7 +62,9 @@ export class TasksService {
     filter: FilterQuery<TaskEntity>,
     handleNotFoundError = true,
   ): Promise<TaskEntity> {
-    const task = await this.tasksRepository.findOne(filter);
+    const task = await this.tasksRepository.findOne(filter, {
+      populate: ['logo'],
+    });
     if (handleNotFoundError) {
       handleNotFound('tasks', task);
     }
