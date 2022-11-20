@@ -22,6 +22,7 @@ import { InputTaskComplitionPaginationDto } from '../tasks/dto/input.task-comple
 import { TasksService } from './tasks.service';
 import { TaskEntity } from './entity/task.entity';
 import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
+import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 
 @Injectable()
 export class TaskCompletionService {
@@ -124,7 +125,7 @@ export class TaskCompletionService {
     return completion;
   }
 
-  async getLeaderBoard(taskId: number) {
+  async getLeaderBoard(taskId: number): Promise<OutputLeaderboardDto> {
     const knex = this.taskRepository.getKnex();
 
     //get subtasks with recursive join

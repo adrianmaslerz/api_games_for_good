@@ -18,24 +18,44 @@ export class TasksService {
   ) {}
 
   async create(data: InputCreateTaskDto) {
-    const task = this.tasksRepository.create(data);
+    const task = this.tasksRepository.create({
+      ...data,
+      recurring: !!parseInt(data.recurring, undefined),
+    });
     await this.tasksRepository.persistAndFlush(task);
     return task;
   }
 
-  async findAll(
-    data: InputGetTasksDto,
-  ): Promise<OutputPaginationDto<OutputTaskDto>> {
-    const query = this.tasksRepository.createQueryBuilder('tasks');
+  async findAll(data: InputGetTasksDto): Promise<any> {
+    const children = (
+      await this.tasksRepository
+        .createQueryBuilder('t')
+        .select(['COUNT(t.id) as id', 't.parent_id'])
+        .where('t.parent_id IS NOT NULL')
+        .groupBy(['t.parent_id'])
+        .getResultList()
+    ).map((el: any) => el.toPlain());
+
+    const query = this.tasksRepository.createQueryBuilder('t');
     query.andWhere({ parent: data.parent ? data.parent : null });
 
     if (Object.values(TaskType).includes(data.type)) {
       query.andWhere({ type: data.type });
     }
 
-    return await pagination({ limit: 10000, offset: 0 }, query, [], {
-      default: 'tasks.id',
+    const results = await pagination({ limit: 10000, offset: 0 }, query, [], {
+      default: 't.id',
     });
+
+    results.results = results.results.map((result) => {
+      return {
+        ...result,
+        childrenCount:
+          children.find((child) => child.parent == result.id)?.id || 0,
+      };
+    });
+
+    return results;
   }
 
   async findOne(
@@ -52,15 +72,23 @@ export class TasksService {
   async update(id: number, data: InputCreateTaskDto) {
     const task = await this.tasksRepository.findOne({ id });
     handleNotFound('tasks', task);
-    task.updateProperties(data, [
-      'name',
-      'date',
-      'description',
-      'color',
-      'type',
-      'parent',
-      'points',
-    ]);
+    task.updateProperties(
+      {
+        ...data,
+        recurring: !!parseInt(data.recurring, undefined),
+      },
+      [
+        'name',
+        'date',
+        'description',
+        'color',
+        'type',
+        'parent',
+        'points',
+        'recurring',
+        'knowledgePill',
+      ],
+    );
     await this.tasksRepository.flush();
     return task;
   }

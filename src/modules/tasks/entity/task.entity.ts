@@ -47,6 +47,14 @@ export class TaskEntity extends BaseEntity {
   @OneToMany(() => TaskCompletionEntity, 'task', { hidden: true })
   completions: TaskCompletionEntity[];
 
+  @Property({ nullable: true })
+  knowledgePill: string;
+
+  @Property({
+    default: false,
+  })
+  recurring: boolean;
+
   public updateProperties<T = InputCreateTaskDto>(
     newData: T,
     fields: Array<keyof T>,

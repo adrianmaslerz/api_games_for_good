@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import { TaskType } from '../entity/task.entity';
 
 export class OutputTaskDto {
@@ -40,4 +40,13 @@ export class OutputTaskDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty()
+  knowledgePill: string;
+
+  @ApiProperty()
+  recurring: boolean;
+
+  @ApiPropertyOptional()
+  childrenCount: number;
 }

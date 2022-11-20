@@ -50,6 +50,7 @@ import {
 import { InputSetTaskStatusDto } from './dto/input.set-task-status.dto';
 import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { InputIdDto } from 'src/core/dto/input.id.dto';
+import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -87,13 +88,10 @@ export class TasksController {
 
   @Get(':id/leaderboard')
   @ApiOperation({ description: 'Get leaderboard' })
-  @ApiPaginationResponse({
-    description: 'Objects returned.',
-    type: OutputTaskDto,
-  })
+  @ApiOkResponse({ type: OutputLeaderboardDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
-  leaderboard(@Param('id') id: number): Promise<any> {
+  leaderboard(@Param('id') id: number): Promise<OutputLeaderboardDto> {
     return this.taskCompletionService.getLeaderBoard(id);
   }
 
@@ -165,6 +163,18 @@ export class TasksController {
     @Body() input: InputCompleteTaskDto,
   ): Promise<any> {
     const task = await this.tasksService.findOne({ id });
+    const hasSubtasks = await this.tasksService.findOne({ parent: id }, false);
+    if (hasSubtasks && !task.recurring) {
+      throw new ConflictException("You can't complete this task without ");
+    }
+    const exists = await this.taskCompletionService.findOne(
+      { task, user },
+      false,
+    );
+    if (exists) {
+      throw new ConflictException('Task already completed');
+    }
+
     return (
       await this.taskCompletionService.completeTask(user, task, files, input)
     ).serialize();

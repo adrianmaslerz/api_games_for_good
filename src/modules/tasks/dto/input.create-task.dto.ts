@@ -9,9 +9,9 @@ import {
   IsNumberString,
   IsOptional,
   MaxLength,
-  ValidateIf
+  ValidateIf,
 } from 'class-validator';
-import {TaskType} from "../entity/task.entity";
+import { TaskType } from '../entity/task.entity';
 
 export class InputCreateTaskDto {
   @ApiProperty({
@@ -61,4 +61,14 @@ export class InputCreateTaskDto {
   @IsInt()
   @ValidateIf((object, value) => value !== null && value !== undefined)
   points: number;
+
+  @ApiProperty()
+  @IsNotEmpty({
+    message: 'The $property is required.',
+  })
+  knowledgePill: string;
+
+  @ApiProperty()
+  @IsOptional()
+  recurring: string;
 }
