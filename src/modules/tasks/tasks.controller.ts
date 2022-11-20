@@ -51,6 +51,7 @@ import { InputSetTaskStatusDto } from './dto/input.set-task-status.dto';
 import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { InputIdDto } from 'src/core/dto/input.id.dto';
 import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
+import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -93,6 +94,18 @@ export class TasksController {
   @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
   leaderboard(@Param('id') id: number): Promise<OutputLeaderboardDto> {
     return this.taskCompletionService.getLeaderBoard(id);
+  }
+
+  @Get(':id/complitions')
+  @ApiOperation({ description: 'Get leaderboard' })
+  @ApiPaginationResponse({ description: '', type: OutputTaskCompletionDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+  @ApiNotFoundResponse({ description: ErrorMessages.USER_NOT_FOUND })
+  getComplitions(
+    @Param('id') id: number,
+    @Query() query: InputPaginationDto,
+  ): Promise<OutputPaginationDto<OutputTaskCompletionDto>> {
+    return this.taskCompletionService.findAll({ ...query, taskId: id });
   }
 
   @Get(':id')

@@ -78,6 +78,7 @@ export class TaskCompletionService {
   public async findAll(
     filters: InputTaskComplitionPaginationDto,
   ): Promise<OutputPaginationDto<any>> {
+    console.log(filters);
     const query =
       this.taskCompletionRepository.createQueryBuilder('completion');
     if (filters.rated === false) {
@@ -85,6 +86,9 @@ export class TaskCompletionService {
     }
     if (filters.rated === false) {
       query.where({ points: { $not: null } });
+    }
+    if (filters.taskId) {
+      query.andWhere({ task: { id: filters.taskId } });
     }
     return pagination(filters, query, [], { default: 'completion.id' });
   }
