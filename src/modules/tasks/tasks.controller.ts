@@ -50,7 +50,6 @@ import {
 } from './dto/input.complete-task.dto';
 import { InputSetTaskStatusDto } from './dto/input.set-task-status.dto';
 import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
-import { InputIdDto } from 'src/core/dto/input.id.dto';
 import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
 import { InputSaveFileDto } from 'src/core/dto/input.save-file.dto';

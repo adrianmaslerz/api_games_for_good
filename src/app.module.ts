@@ -10,6 +10,7 @@ import { SharedModule } from './modules/shared.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { UserModule } from './modules/user/user.module';
 import {CommentsModule} from "./modules/comments/comments.module";
+import {RewardsModule} from "./modules/rewards/rewards.module";
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import {CommentsModule} from "./modules/comments/comments.module";
     UserModule,
     TasksModule,
     SharedModule,
-    CommentsModule
+    CommentsModule,
+    RewardsModule
   ],
 })
 export class AppModule {}
