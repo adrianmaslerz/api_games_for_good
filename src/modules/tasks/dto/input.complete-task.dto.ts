@@ -9,9 +9,9 @@ import {
   IsNumberString,
   IsOptional,
   MaxLength,
-  ValidateIf
+  ValidateIf,
 } from 'class-validator';
-import {TaskType} from "../entity/task.entity";
+import { TaskType } from '../entity/task.entity';
 
 export class InputCompleteTaskDto {
   @ApiProperty()
@@ -19,4 +19,9 @@ export class InputCompleteTaskDto {
     message: 'The $property is required.',
   })
   description: string;
+}
+
+export class InputCompleteTaskDtoWithFile extends InputCompleteTaskDto {
+  @ApiProperty({ format: 'binary' })
+  readonly files: Express.Multer.File[];
 }

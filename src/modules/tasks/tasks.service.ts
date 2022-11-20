@@ -8,6 +8,7 @@ import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
 import { OutputTaskDto } from './dto/output.task.dto';
 import { handleNotFound, pagination } from '../../core/utils/utils';
 import { InputGetTasksDto } from './dto/input.get-tasks.dto';
+import { TaskCompletionStatus } from './entity/task-completion.entity';
 
 @Injectable()
 export class TasksService {
