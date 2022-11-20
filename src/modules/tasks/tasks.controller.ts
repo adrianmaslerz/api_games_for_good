@@ -42,8 +42,8 @@ import { InputSaveFilesDto } from '../../core/dto/input.save-files.dto';
 import { OutputAuthTokensDto } from '../auth/dto/output.auth-token.dto';
 import { User } from '../../core/decorators/user.decorator';
 import { UserEntity } from '../user/entity/user.entity';
-import { TaskCompletionService } from './task-completion.service';
 import { InputCompleteTaskDto } from './dto/input.complete-task.dto';
+import {TaskCompletionService} from "./task-completion.service";
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -131,7 +131,7 @@ export class TasksController {
     const task = await this.tasksService.findOne({ id });
 
     const hasSubtasks = await this.tasksService.findOne({ parent: id }, false);
-    if (hasSubtasks) {
+    if (hasSubtasks && !task.recurring) {
       throw new ConflictException("You can't complete this task without ");
     }
     const exists = await this.taskCompletionService.findOne(

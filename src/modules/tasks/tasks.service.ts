@@ -17,7 +17,10 @@ export class TasksService {
   ) {}
 
   async create(data: InputCreateTaskDto) {
-    const task = this.tasksRepository.create(data);
+    const task = this.tasksRepository.create({
+      ...data,
+      recurring: !!parseInt(data.recurring, undefined),
+    });
     await this.tasksRepository.persistAndFlush(task);
     return task;
   }
@@ -68,15 +71,23 @@ export class TasksService {
   async update(id: number, data: InputCreateTaskDto) {
     const task = await this.tasksRepository.findOne({ id });
     handleNotFound('tasks', task);
-    task.updateProperties(data, [
-      'name',
-      'date',
-      'description',
-      'color',
-      'type',
-      'parent',
-      'points',
-    ]);
+    task.updateProperties(
+      {
+        ...data,
+        recurring: !!parseInt(data.recurring, undefined),
+      },
+      [
+        'name',
+        'date',
+        'description',
+        'color',
+        'type',
+        'parent',
+        'points',
+        'recurring',
+        'knowledgePill',
+      ],
+    );
     await this.tasksRepository.flush();
     return task;
   }
