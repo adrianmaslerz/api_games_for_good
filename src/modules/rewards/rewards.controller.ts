@@ -1,12 +1,15 @@
 import {
   Body,
-  Controller, Delete,
+  ConflictException,
+  Controller,
+  Delete,
   Get,
   Param,
   Post,
   Put,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,7 +17,9 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiConsumes,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -27,7 +32,7 @@ import { RoleGuard } from '../../core/guards/roles.guard';
 import { Roles } from '../../core/enums/roles.enum';
 import { OutputTaskDto } from '../tasks/dto/output.task.dto';
 import { InputCreateRewardDto } from './dto/input.create-reward.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { InputSaveFileDto } from '../../core/dto/input.save-file.dto';
 import { User } from '../../core/decorators/user.decorator';
 import { UserEntity } from '../user/entity/user.entity';
@@ -38,14 +43,25 @@ import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
 import { OutputRewardDto } from './dto/output.reward.dto';
 import { InputCreateTaskDto } from '../tasks/dto/input.create-task.dto';
 import { InputUpdateRewardDto } from './dto/input.update-reward.dto';
-import {SuccessOutputDTO} from "../../core/dto/output.success.dto";
+import { SuccessOutputDTO } from '../../core/dto/output.success.dto';
+import {
+  InputCompleteTaskDto,
+  InputCompleteTaskDtoWithFile,
+} from '../tasks/dto/input.complete-task.dto';
+import { OutputAuthTokensDto } from '../auth/dto/output.auth-token.dto';
+import { RewardsRedeemService } from './rewards-redeem.service';
+import {UserService} from "../user/user.service";
 
 @ApiTags('Rewards')
 @Controller('rewards')
 @ApiBearerAuth()
 @UseGuards(AuthGuard())
 export class RewardsController {
-  constructor(private readonly rewardsService: RewardsService) {}
+  constructor(
+    private readonly rewardsService: RewardsService,
+    private readonly rewardsRedeemService: RewardsRedeemService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   @UseGuards(new RoleGuard(Roles.ADMIN))
@@ -114,5 +130,29 @@ export class RewardsController {
   async remove(@Param('id') id: number) {
     await this.rewardsService.remove(id);
     return new SuccessOutputDTO();
+  }
+
+  @Post(':id/redeem')
+  @ApiOperation({ description: 'complete task' })
+  @ApiCreatedResponse({
+    description: 'Object returned.',
+    type: OutputAuthTokensDto,
+  })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  @ApiConflictResponse({ description: 'Validation failed.' })
+  public async redeemTask(
+    @User() user: UserEntity,
+    @Param('id') id: number,
+  ): Promise<any> {
+    const reward = await this.rewardsService.findOne({ id });
+
+    if ((user.pointsEarned || 0) < reward.points) {
+      throw new ConflictException("You don't have enough points");
+    }
+
+    const redeem = await this.rewardsRedeemService.redeemReward(user, reward);
+    await this.userService.subtractPoints(user.id, redeem.points);
+
+    return redeem.serialize();
   }
 }
