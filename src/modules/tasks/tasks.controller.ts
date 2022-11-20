@@ -12,6 +12,7 @@ import {
   UploadedFiles,
   HttpException,
   ConflictException,
+  UploadedFile,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { InputCreateTaskDto } from './dto/input.create-task.dto';
@@ -37,7 +38,7 @@ import { ErrorMessages } from '../../core/enums/error-messages.enum';
 import { OutputPaginationDto } from '../../core/dto/output.pagination.dto';
 import { InputGetTasksDto } from './dto/input.get-tasks.dto';
 import { SuccessOutputDTO } from '../../core/dto/output.success.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { InputSaveFilesDto } from '../../core/dto/input.save-files.dto';
 import { OutputAuthTokensDto } from '../auth/dto/output.auth-token.dto';
 import { User } from '../../core/decorators/user.decorator';
@@ -52,6 +53,7 @@ import { OutputTaskCompletionDto } from './dto/output.task-completion.dto';
 import { InputIdDto } from 'src/core/dto/input.id.dto';
 import { OutputLeaderboardDto } from './dto/output.leaderboard.dto';
 import { InputPaginationDto } from 'src/core/dto/input.pagination.dto';
+import { InputSaveFileDto } from 'src/core/dto/input.save-file.dto';
 
 @ApiTags('Tasks')
 @Controller('tasks')
@@ -71,6 +73,20 @@ export class TasksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   async create(@Body() input: InputCreateTaskDto) {
     return (await this.tasksService.create(input)).serialize();
+  }
+
+  @Put(':id/logo')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ description: 'upload logo' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ description: 'file', type: InputSaveFileDto })
+  @ApiBadRequestResponse({ description: 'Validation failed.' })
+  public async uploadProfilePhoto(
+    @User() user: UserEntity,
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id') id: number,
+  ): Promise<any> {
+    return this.tasksService.addLogo(id, file);
   }
 
   @Get()

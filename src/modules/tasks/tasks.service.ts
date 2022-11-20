@@ -9,12 +9,15 @@ import { OutputTaskDto } from './dto/output.task.dto';
 import { handleNotFound, pagination } from '../../core/utils/utils';
 import { InputGetTasksDto } from './dto/input.get-tasks.dto';
 import { TaskCompletionStatus } from './entity/task-completion.entity';
+import { UploadService } from '../upload/upload.service';
+import { FileTypes } from 'src/core/enums/file-types.enum';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectRepository(TaskEntity)
     private readonly tasksRepository: EntityRepository<TaskEntity>,
+    private uploadService: UploadService,
   ) {}
 
   async create(data: InputCreateTaskDto) {
@@ -98,5 +101,18 @@ export class TasksService {
     handleNotFound('tasks', task);
     await this.tasksRepository.removeAndFlush(task);
     return true;
+  }
+
+  async addLogo(id: number, file: Express.Multer.File) {
+    const task = await this.findOne({ id });
+    const uploadedFile = await this.uploadService.save(
+      'profile',
+      file,
+      FileTypes.IMAGE,
+    );
+    task.logo = uploadedFile;
+
+    await this.tasksRepository.flush();
+    return task;
   }
 }

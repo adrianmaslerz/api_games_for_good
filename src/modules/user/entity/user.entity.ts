@@ -32,10 +32,7 @@ export class UserEntity extends BaseEntity {
 
   @ManyToOne(() => UploadedFileEntity, {
     nullable: true,
-    serializer: (file) => {
-      console.log('serializing', file);
-      return file;
-    },
+    serializer: (file) => file.url,
   })
   profilePhoto: UploadedFileEntity;
 

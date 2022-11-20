@@ -49,7 +49,9 @@ export class UserService {
   }
 
   async findOne(filter: FilterQuery<UserEntity>): Promise<UserEntity> {
-    const user = await this.userRepository.findOne(filter);
+    const user = await this.userRepository.findOne(filter, {
+      populate: ['profilePhoto'],
+    });
     handleNotFound('user', user);
     return user;
   }
@@ -60,6 +62,9 @@ export class UserService {
       throw new BadRequestException(ErrorMessages.USER_NOT_FOUND);
     }
     user.updateProperties(data, ['password', 'role', 'username']);
+    if (!data.password) {
+      delete user.password;
+    }
     await this.userRepository.flush();
     return user;
   }
@@ -71,6 +76,7 @@ export class UserService {
       FileTypes.IMAGE,
     );
     user.profilePhoto = uploadedFile;
+    delete user.password;
     await this.userRepository.flush();
     return user;
   }

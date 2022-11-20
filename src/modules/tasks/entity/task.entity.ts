@@ -1,5 +1,7 @@
 import { Entity, Enum, ManyToOne, OneToMany, Property } from '@mikro-orm/core';
+import { UploadedFile } from '@nestjs/common';
 import { Exclude } from 'class-transformer';
+import { UploadedFileEntity } from 'src/modules/upload/entity/uploaded-file.entity';
 import { BaseEntity } from '../../../core/entity/base.entity';
 import { InputCreateTaskDto } from '../dto/input.create-task.dto';
 import { TaskCompletionEntity } from './task-completion.entity';
@@ -22,10 +24,11 @@ export class TaskEntity extends BaseEntity {
   })
   parent?: TaskEntity;
 
-  @Property({
+  @ManyToOne(() => UploadedFileEntity, {
     nullable: true,
+    serializer: (file) => file.url,
   })
-  logo?: string;
+  logo?: UploadedFileEntity;
 
   @Property()
   description: string;
