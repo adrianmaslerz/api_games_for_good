@@ -128,10 +128,17 @@ export class TaskCompletionService {
       populate: ['task'] as any,
     });
     completion.status = status;
-    await this.userService.addPoints(
-      completion.user.id,
-      -completion.points + completion.task.points,
-    );
+    if (completion.points && status == TaskCompletionStatus.REJECTED) {
+      await this.userService.addPoints(
+        completion.user.id,
+        -completion.task.points,
+      );
+    } else {
+      await this.userService.addPoints(
+        completion.user.id,
+        -completion.points + completion.task.points,
+      );
+    }
     completion.points =
       status == TaskCompletionStatus.ACCEPTED ? completion.task.points : 0;
 
