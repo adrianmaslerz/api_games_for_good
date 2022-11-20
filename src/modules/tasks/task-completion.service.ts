@@ -81,6 +81,8 @@ export class TaskCompletionService {
     console.log(filters);
     const query =
       this.taskCompletionRepository.createQueryBuilder('completion');
+    query.leftJoinAndSelect('completion.user', 'user');
+    query.leftJoinAndSelect('completion.uploadedFiles', 'uploadedFiles');
     if (filters.rated === false) {
       query.where({ points: null });
     }
