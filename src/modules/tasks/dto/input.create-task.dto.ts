@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsDate,
-  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -11,6 +10,7 @@ import {
   MaxLength,
   ValidateIf,
 } from 'class-validator';
+import { IsEnum } from '../../../core/utils/validators';
 import { TaskType } from '../entity/task.entity';
 
 export class InputCreateTaskDto {

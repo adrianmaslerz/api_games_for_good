@@ -30,7 +30,7 @@ export class TaskCompletionEntity extends BaseEntity {
   @Property({ default: 0 })
   points: number;
 
-  @Enum(() => TaskCompletionStatus)
+  @Enum({ items: () => TaskCompletionStatus })
   status: TaskCompletionStatus = TaskCompletionStatus.SENT;
 
   public updateProperties<T = InputUpdateTaskCompletionDto>(
