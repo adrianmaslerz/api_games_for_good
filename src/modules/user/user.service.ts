@@ -95,6 +95,12 @@ export class UserService {
     this.userRepository.flush();
   }
 
+  async subtractPoints(id: number, amount: number) {
+    const user = await this.findOne(id);
+    user.pointsEarned = user.pointsEarned - amount;
+    this.userRepository.flush();
+  }
+
   async remove(id: number) {
     let user = await this.userRepository.findOne({ id });
     if (!user) {
