@@ -43,6 +43,7 @@ export class TasksService {
     query.select(['*', subquery]);
 
     query.andWhere({ parent: data.parent ? data.parent : null });
+    query.orderBy({ id: 'ASC' });
 
     if (Object.values(TaskType).includes(data.type)) {
       query.andWhere({ type: data.type });
@@ -52,7 +53,7 @@ export class TasksService {
 
     return resultData.map((el) => ({
       ...this.mikroORM.em.map(TaskEntity, el).serialize(),
-      childrenCount: el.childrenCount,
+      childrenCount: parseInt(el.childrenCount),
     }));
   }
 
